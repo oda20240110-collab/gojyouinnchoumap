@@ -3,23 +3,17 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
-    "build": "next build --turbopack",
+    "dev": "next dev",
+    "build": "next build",
     "start": "next start"
-{
+  },
   "dependencies": {
+    "next": "15.5.4",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
     "react-leaflet": "^4.2.1",
     "leaflet": "^1.9.4",
     "qrcode.react": "^3.1.0",
     "framer-motion": "^11.0.0"
-  }
-}
-  "devDependencies": {
-    "typescript": "^5",
-    "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "@tailwindcss/postcss": "^4",
-    "tailwindcss": "^4"
   }
 }
