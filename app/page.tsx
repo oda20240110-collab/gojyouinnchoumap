@@ -4,17 +4,13 @@ import React, { useEffect, useMemo, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { QRCodeCanvas } from 'qrcode.react';
 
-// ──────────────────────────────────────────────
-// Leaflet（地図）はブラウザ専用なので dynamic import（SSR 無効）
-// ──────────────────────────────────────────────
+// ── Leaflet（地図）はブラウザ専用なので dynamic import（SSR 無効） ──
 const MapContainer: any = dynamic(() => import('react-leaflet').then(m => m.MapContainer), { ssr: false });
 const TileLayer: any     = dynamic(() => import('react-leaflet').then(m => m.TileLayer),     { ssr: false });
 const Marker: any        = dynamic(() => import('react-leaflet').then(m => m.Marker),        { ssr: false });
 const Popup: any         = dynamic(() => import('react-leaflet').then(m => m.Popup),         { ssr: false });
 
-// ──────────────────────────────────────────────
-// Leaflet のピン表示修正（ビルド後にピン画像が出ない対策）
-// ──────────────────────────────────────────────
+// ── ビルド後にピン画像が出ない対策 ──
 function useLeafletIconFix() {
   useEffect(() => {
     (async () => {
@@ -31,67 +27,17 @@ function useLeafletIconFix() {
   }, []);
 }
 
-// ──────────────────────────────────────────────
-/** 多言語テキスト（型付き） */
-// ──────────────────────────────────────────────
+// ── 多言語辞書（型付き） ──
 const dict = {
-  ja: {
-    title: '御城印マップ',
-    subtitle: '御城印がもらえるお城を地図で検索',
-    search: '検索',
-    region: '地方',
-    prefecture: '都道府県',
-    all: 'すべて',
-    data: 'データ',
-    addFromCSV: 'CSV読み込み',
-    qr: 'QRコード',
-    openHere: 'このページを開く',
-    lang: '言語',
-    stampAvailable: '御城印あり',
-    moreInfo: '詳細',
-    filter: '絞り込み',
-  },
-  en: {
-    title: 'Gojoin Castle Map',
-    subtitle: 'Find castles offering Gojoin (castle stamps)',
-    search: 'Search',
-    region: 'Region',
-    prefecture: 'Prefecture',
-    all: 'All',
-    data: 'Data',
-    addFromCSV: 'Import CSV',
-    qr: 'QR Code',
-    openHere: 'Open this page',
-    lang: 'Language',
-    stampAvailable: 'Gojoin available',
-    moreInfo: 'Details',
-    filter: 'Filter',
-  },
-  zh: {
-    title: '御城印地图',
-    subtitle: '在地图上查找可领取御城印的城堡',
-    search: '搜索',
-    region: '地区',
-    prefecture: '都道府县',
-    all: '全部',
-    data: '数据',
-    addFromCSV: '导入CSV',
-    qr: '二维码',
-    openHere: '打开此页面',
-    lang: '语言',
-    stampAvailable: '可领取御城印',
-    moreInfo: '详情',
-    filter: '筛选',
-  },
+  ja: { title:'御城印マップ', subtitle:'御城印がもらえるお城を地図で検索', search:'検索', region:'地方', prefecture:'都道府県', all:'すべて', data:'データ', addFromCSV:'CSV読み込み', qr:'QRコード', openHere:'このページを開く', lang:'言語', stampAvailable:'御城印あり', moreInfo:'詳細', filter:'絞り込み' },
+  en: { title:'Gojoin Castle Map', subtitle:'Find castles offering Gojoin (castle stamps)', search:'Search', region:'Region', prefecture:'Prefecture', all:'All', data:'Data', addFromCSV:'Import CSV', qr:'QR Code', openHere:'Open this page', lang:'Language', stampAvailable:'Gojoin available', moreInfo:'Details', filter:'Filter' },
+  zh: { title:'御城印地图', subtitle:'在地图上查找可领取御城印的城堡', search:'搜索', region:'地区', prefecture:'都道府县', all:'全部', data:'数据', addFromCSV:'导入CSV', qr:'二维码', openHere:'打开此页面', lang:'语言', stampAvailable:'可领取御城印', moreInfo:'详情', filter:'筛选' },
 } as const;
-
-type Lang = keyof typeof dict;             // 'ja' | 'en' | 'zh'
-type TKey = keyof (typeof dict)['ja'];     // 各辞書キー
+type Lang = keyof typeof dict;
+type TKey = keyof (typeof dict)['ja'];
 const t = (lang: Lang, key: TKey) => dict[lang][key];
 
-// ──────────────────────────────────────────────
-/** 地方・都道府県 */
-// ──────────────────────────────────────────────
+// ── 地方・都道府県 ──
 const PREFS: Record<string, string[]> = {
   '北海道・東北': ['北海道','青森','岩手','宮城','秋田','山形','福島'],
   '関東': ['東京','神奈川','千葉','埼玉','茨城','栃木','群馬'],
@@ -104,9 +50,7 @@ const PREFS: Record<string, string[]> = {
   '九州・沖縄': ['福岡','佐賀','長崎','熊本','大分','宮崎','鹿児島','沖縄'],
 };
 
-// ──────────────────────────────────────────────
-/** 種データ（CSVで差し替え可能） */
-// ──────────────────────────────────────────────
+// ── 初期サンプル（/public/castles.csv が無い場合の保険） ──
 const SEED = [
   { id:'matsumoto', name_ja:'松本城', name_en:'Matsumoto Castle', name_zh:'松本城', prefecture:'長野', region:'甲信越', lat:36.2381, lng:137.9680, url:'https://www.matsumoto-castle.jp/', gojoin_url:'https://www.matsumoto-castle.jp/topics/8063.html' },
   { id:'kumamoto',  name_ja:'熊本城', name_en:'Kumamoto Castle',  name_zh:'熊本城', prefecture:'熊本', region:'九州・沖縄', lat:32.8067, lng:130.7056, url:'https://castle.kumamoto-guide.jp/', gojoin_url:'https://kumamoto-icb.or.jp/%E7%86%8A%E6%9C%AC%E5%9F%8E%E3%80%8C%E5%BE%A1%E5%9F%8E%E5%8D%B0%E3%80%8D%E3%81%AE%E3%81%94%E7%B4%B9%E4%BB%8B/' },
@@ -115,9 +59,7 @@ const SEED = [
   { id:'hamamatsu', name_ja:'浜松城', name_en:'Hamamatsu Castle',  name_zh:'滨松城', prefecture:'静岡', region:'東海', lat:34.7179, lng:137.7238, url:'https://hamamatsu-jyo.jp/', gojoin_url:'https://shizuoka.hellonavi.jp/gojyoin' },
 ];
 
-// ──────────────────────────────────────────────
-/** URLハッシュ永続化（言語や検索条件をURLに保持→QRで共有可） */
-// ──────────────────────────────────────────────
+// ── URLハッシュに状態保存（言語・検索条件をQR共有可） ──
 function useHashState(key: string, initial: string) {
   const [state, setState] = useState<string>(() => {
     if (typeof window === 'undefined') return initial;
@@ -133,7 +75,6 @@ function useHashState(key: string, initial: string) {
   return [state, setState] as const;
 }
 
-// ──────────────────────────────────────────────
 export default function Page() {
   useLeafletIconFix();
 
@@ -142,6 +83,36 @@ export default function Page() {
   const [region, setRegion] = useHashState('region', '');
   const [pref, setPref] = useHashState('pref', '');
   const [data, setData] = useState(SEED);
+
+  // ── ここが追加点：/public/castles.csv を起動時に自動読込 ──
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetch('/castles.csv', { cache: 'no-store' });
+        if (!res.ok) return; // 無ければSEEDのまま
+        const text = await res.text();
+        const lines = text.split(/\r?\n/).filter(Boolean);
+        const headers = lines.shift()!.split(',');
+        const rows = lines.map(line => {
+          const cols = line.split(',');
+          const o: any = {}; headers.forEach((h,i)=> o[h.trim()] = cols[i]?.trim());
+          return {
+            id:o.id,
+            name_ja:o.name_ja,
+            name_en:o.name_en || o.name_ja,
+            name_zh:o.name_zh || o.name_ja,
+            prefecture:o.prefecture,
+            region:o.region,
+            lat:parseFloat(o.lat),
+            lng:parseFloat(o.lng),
+            url:o.url,
+            gojoin_url:o.gojoin_url
+          };
+        }).filter((r:any)=>Number.isFinite(r.lat)&&Number.isFinite(r.lng));
+        if (rows.length) setData(rows);
+      } catch { /* 失敗時は何もしない（SEEDのまま） */ }
+    })();
+  }, []);
 
   const filtered = useMemo(() => data.filter(d => {
     if (region && d.region !== region) return false;
@@ -189,7 +160,7 @@ export default function Page() {
           </div>
         </div>
 
-        {/* コントロール */}
+        {/* 検索＆フィルタ */}
         <div style={{display:'grid', gridTemplateColumns:'1fr', gap:12, marginTop:12}}>
           <div style={{display:'grid', gridTemplateColumns:'1fr 1fr 1fr 1fr', gap:8, alignItems:'center'}}>
             <input value={q} onChange={e=>setQ(e.target.value)} placeholder={`${t(lang as Lang,'search')}...`} />
@@ -256,7 +227,7 @@ export default function Page() {
         </div>
 
         <footer style={{fontSize:12, color:'#64748b', marginTop:16}}>
-          Tiles © OpenStreetMap. Icons © Leaflet. Seed includes Matsumoto, Kumamoto, Hirosaki, Himeji, Hamamatsu.
+          Tiles © OpenStreetMap. Icons © Leaflet.
         </footer>
       </div>
     </div>
