@@ -1,12 +1,13 @@
 {
-  "name": "nextjs",
-  "version": "0.1.0",
-  "private": true,
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start"
-  },
+  "name": "castle-builder",
+  "version": "1.0.0",
+  "type": "module",
+  "dependencies": {
+    "cheerio": "1.0.0-rc.12",
+    "node-fetch": "3.3.2",
+    "p-limit": "5.0.0"
+  }
+}
   "dependencies": {
     "autoprefixer": "10.4.19",
     "framer-motion": "11.0.0",
